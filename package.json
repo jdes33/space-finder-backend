@@ -1,0 +1,27 @@
+{
+  "name": "space-finder-backend",
+  "version": "1.0.0",
+  "description": "following along with cdk course",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jdes33/space-finder-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jdes33/space-finder-backend/issues"
+  },
+  "homepage": "https://github.com/jdes33/space-finder-backend#readme",
+  "devDependencies": {
+    "aws-cdk": "^2.63.0",
+    "aws-cdk-lib": "^2.63.0",
+    "constructs": "^10.1.237",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  }
+}
