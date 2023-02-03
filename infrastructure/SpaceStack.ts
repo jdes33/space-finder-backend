@@ -13,12 +13,18 @@ export class SpaceStack extends Stack {
     private api = new RestApi(this, 'SpaceApi');
     
     // create an actual table called SpacesTable
+    // Note that we have creaed a folder with same name as tableName, SpacesTable, which has files for each lambda we defined inside...
+    // ... the GenericTable class will automatically hook these up to the created table for us.
     // the constructor of the GenericTableClass will create the table,
     // create some lambdas for CRUD operations and grant these lambdas appropriate rights so they work.
     private spacesTable = new GenericTable(this, {
         tableName: 'SpacesTable',
         primaryKey: 'spaceId',
-        createLambdaPath: 'Create'
+        createLambdaPath: 'Create', // name of the create lambda file in the SpacesFolder directory
+        readLambdaPath: 'Read',
+        updateLambdaPath: 'Update',
+        deleteLambdaPath: 'Delete',
+        secondaryIndexes: ['location']
     })
 
     constructor(scope: Construct, id: string, props: StackProps) {
@@ -46,7 +52,9 @@ export class SpaceStack extends Stack {
         const spaceResource = this.api.root.addResource('spaces');
         // add a POST method that refers to the createLambdaIntegration attribute of the spacesTable
         spaceResource.addMethod('POST', this.spacesTable.createLambdaIntegration);
-
+        spaceResource.addMethod('GET', this.spacesTable.readLambdaIntegration);
+        spaceResource.addMethod('PUT', this.spacesTable.updateLambdaIntegration);
+        spaceResource.addMethod('DELETE', this.spacesTable.deleteLambdaIntegration);
 
     }
 }

@@ -1,13 +1,41 @@
-@endpoint = https://xy3bm084cd.execute-api.us-east-1.amazonaws.com/prod/
+@endpoint = https://e4zsvz0rfa.execute-api.us-east-1.amazonaws.com/prod/
 
 
-GET  {{endpoint}}/hello
+
+// get all spaces items in the table
+GET  {{endpoint}}spaces/
 ###
 
-POST {{endpoint}}/spaces/
+// get a specific space item (using the primary key)
+// the read.ts file shows how the id is extracted
+GET  {{endpoint}}spaces?spaceId=4a7ddfca-6344-44d9-8923-5708545cf6f4
+###
+
+
+// query by secondary key (gets all items that match0
+GET  {{endpoint}}spaces?location=London
+###
+
+// update
+PUT  {{endpoint}}spaces?spaceId=a81b0456-4d34-4833-8afd-aa91108399dd
 Content-Type: application/json
 
 {
-    "location": "London", // recall we don't have a schema in nosql so can add whatever we want
-    "name": "Best Location"
+    "location": "Updated location"
 }
+###
+
+// add a space item to table
+// recall we don't have a schema in nosql so can add whatever we want
+POST {{endpoint}}spaces/
+Content-Type: application/json
+
+{
+    "location": "London", 
+    "name": "Tub"
+}
+###
+
+// delete an item (by specifiying it's primary key)
+DELETE  {{endpoint}}spaces?spaceId=a81b0456-4d34-4833-8afd-aa91108399dda81b0456-4d34-4833-8afd-aa91108399dd
+###

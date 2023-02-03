@@ -9,10 +9,12 @@ import { join } from 'path'
 export interface TableProps {
     tableName: string,
     primaryKey: string,
+    secondaryIndexes?: string[],
     createLambdaPath?: string,
     readLambdaPath?: string,
     updateLambdaPath?: string,
     deleteLambdaPath?: string,
+    
 }
 
 export class GenericTable {
@@ -42,8 +44,35 @@ export class GenericTable {
 
     private initialize(){
         this.createTable();
+        this.addSecondaryIndexes();
         this.createLambdas();
         this.grantTableRights();
+    }
+
+    // create an actual table, need a name, eg. Employee and the primary key name should be specified
+    private createTable(){
+        this.table = new Table(this.stack, this.props.tableName, {
+            partitionKey: {
+                name: this.props.primaryKey,
+                type: AttributeType.STRING
+            },
+            tableName: this.props.tableName
+        })
+    }
+
+    // add secondary user specified secondary indexes to the created table
+    private addSecondaryIndexes() {
+        if(this.props.secondaryIndexes) {
+            for (const secondaryIndex of this.props.secondaryIndexes) {
+                this.table.addGlobalSecondaryIndex({
+                    indexName: secondaryIndex,
+                    partitionKey: {
+                        name: secondaryIndex,
+                        type: AttributeType.STRING
+                    }            
+                })
+            }
+        }
     }
 
     // create the CRUD lambdas (if lambda path's specified)
@@ -71,16 +100,7 @@ export class GenericTable {
         }
     }
 
-    // create an actual table, need a name, eg. Employee and the primary key name should be specified
-    private createTable(){
-        this.table = new Table(this.stack, this.props.tableName, {
-            partitionKey: {
-                name: this.props.primaryKey,
-                type: AttributeType.STRING
-            },
-            tableName: this.props.tableName
-        })
-    }
+
 
     // grant rights to the lambdas to interact with the table
     private grantTableRights() {
