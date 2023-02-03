@@ -1,4 +1,13 @@
-@endpoint = https://xy3bm084cd.execute-api.us-east-1.amazonaws.com/prod
+@endpoint = https://xy3bm084cd.execute-api.us-east-1.amazonaws.com/prod/
 
 
 GET  {{endpoint}}/hello
+###
+
+POST {{endpoint}}/spaces/
+Content-Type: application/json
+
+{
+    "location": "London", // recall we don't have a schema in nosql so can add whatever we want
+    "name": "Best Location"
+}
