@@ -1418,13 +1418,203 @@
     "aws:cdk:path": "Space-finder/SpaceUserAuthoriser/Resource"
    }
   },
+  "SpaceFinderIdentityPool": {
+   "Type": "AWS::Cognito::IdentityPool",
+   "Properties": {
+    "AllowUnauthenticatedIdentities": true,
+    "CognitoIdentityProviders": [
+     {
+      "ClientId": {
+       "Ref": "SpaceUserPoolSpaceUserPoolclient4839E5E8"
+      },
+      "ProviderName": {
+       "Fn::GetAtt": [
+        "SpaceUserPool6AB542DC",
+        "ProviderName"
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "Space-finder/SpaceFinderIdentityPool"
+   }
+  },
+  "CognitoDefaultAuthenticatedRoleC5D5C31E": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRoleWithWebIdentity",
+       "Condition": {
+        "StringEquals": {
+         "cognito-identity.amazonaws.com:aud": {
+          "Ref": "SpaceFinderIdentityPool"
+         }
+        },
+        "ForAnyValue:StringLike": {
+         "cognito-identity.amazonaws.com:amr": "authenticated"
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Federated": "cognito-identity.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "Space-finder/CognitoDefaultAuthenticatedRole/Resource"
+   }
+  },
+  "CognitoDefaultUnAuthenticatedRole6CA311FD": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRoleWithWebIdentity",
+       "Condition": {
+        "StringEquals": {
+         "cognito-identity.amazonaws.com:aud": {
+          "Ref": "SpaceFinderIdentityPool"
+         }
+        },
+        "ForAnyValue:StringLike": {
+         "cognito-identity.amazonaws.com:amr": "unauthenticated"
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Federated": "cognito-identity.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "Space-finder/CognitoDefaultUnAuthenticatedRole/Resource"
+   }
+  },
+  "CognitoAdminRole4C10FBA4": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRoleWithWebIdentity",
+       "Condition": {
+        "StringEquals": {
+         "cognito-identity.amazonaws.com:aud": {
+          "Ref": "SpaceFinderIdentityPool"
+         }
+        },
+        "ForAnyValue:StringLike": {
+         "cognito-identity.amazonaws.com:amr": "authenticated"
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Federated": "cognito-identity.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "Space-finder/CognitoAdminRole/Resource"
+   }
+  },
+  "CognitoAdminRoleDefaultPolicyBC6192E4": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:ListAllMyBuckets",
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CognitoAdminRoleDefaultPolicyBC6192E4",
+    "Roles": [
+     {
+      "Ref": "CognitoAdminRole4C10FBA4"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "Space-finder/CognitoAdminRole/DefaultPolicy/Resource"
+   }
+  },
+  "RolesAttachment": {
+   "Type": "AWS::Cognito::IdentityPoolRoleAttachment",
+   "Properties": {
+    "IdentityPoolId": {
+     "Ref": "SpaceFinderIdentityPool"
+    },
+    "RoleMappings": {
+     "adminsMapping": {
+      "AmbiguousRoleResolution": "AuthenticatedRole",
+      "IdentityProvider": {
+       "Fn::Join": [
+        "",
+        [
+         {
+          "Fn::GetAtt": [
+           "SpaceUserPool6AB542DC",
+           "ProviderName"
+          ]
+         },
+         ":",
+         {
+          "Ref": "SpaceUserPoolSpaceUserPoolclient4839E5E8"
+         }
+        ]
+       ]
+      },
+      "Type": "Token"
+     }
+    },
+    "Roles": {
+     "authenticated": {
+      "Fn::GetAtt": [
+       "CognitoDefaultAuthenticatedRoleC5D5C31E",
+       "Arn"
+      ]
+     },
+     "unauthenticated": {
+      "Fn::GetAtt": [
+       "CognitoDefaultUnAuthenticatedRole6CA311FD",
+       "Arn"
+      ]
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "Space-finder/RolesAttachment"
+   }
+  },
   "admins": {
    "Type": "AWS::Cognito::UserPoolGroup",
    "Properties": {
     "UserPoolId": {
      "Ref": "SpaceUserPool6AB542DC"
     },
-    "GroupName": "admins"
+    "GroupName": "admins",
+    "RoleArn": {
+     "Fn::GetAtt": [
+      "CognitoAdminRole4C10FBA4",
+      "Arn"
+     ]
+    }
    },
    "Metadata": {
     "aws:cdk:path": "Space-finder/admins"
@@ -1525,7 +1715,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/3WRT0/DMAzFPwv3LPyZQOLYDcEJmAacpyw1xV0aV3HCVKp+d5JmHduBk3/vqXbtlxt5N5dXF2rPM13uZga3sn/zSu9EtDa9arFSHvaqk/0a2BctiuWnPcFCawrWiwdoDXUNRIzuiYrTKkhehthKwWlYKP4Th5mZn8F/UZmsiaiy6OmDwa2IDBch2g5/wI0LHNUgUDVxTzJ5YKorMqi7JDMNwqhmWyrZJwtcg8xINn3wGKz2kQdRdlY1VMYo3tU2Dxthat5YKqFm+TKWqU/wfKOYwbMsUolaLoLegR9v1fkK2U93pLFHnmBp8BDh/86To9AOw1l6r8G3wYvxxylotNVZqJGXZEvMB6b9Zc2X39f38jY+f82IMxefERuQ61x/Ac1DVh8aAgAA"
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/2WSy07DMBBFv4W9ax4VSCzTIhALoCqwrlzbpNPansgPqhDl3xnHDbSwmnOvPKN5+IrfTPnFmdiHiVS7iYE1716jkDtG1qoTDdQi6r1oebfUIVYNsPmHO8JKSkwusjvdGGytJiT3SFG1WmevAKVi8lLPRPgVh5qFn3TcoMrWSFg7iPgetF8gmlAlsj18aT808KN6BsJSn2hKwRwXaEC2WRbqmRF2rQTvsqW9hRAAXX5wn5yMxD1TrRMWFa3iTaxLsQHG5JVDpbeBPw9hzGNhuhIh6Bh4lQNpPktyp+MwqyxT8G6cI5f94RHmBg4r/O88KgKI7Zh8rPOwVaTDbeyf/AePqen7k12/pNikyIY281nA1ScnIJ6jU1DWkafl23D+eXnLr+mzbAPAxNPRwWq+LPEbiBnllkgCAAA="
    },
    "Metadata": {
     "aws:cdk:path": "Space-finder/CDKMetadata/Default"
@@ -1568,6 +1758,11 @@
   "userPoolClientId": {
    "Value": {
     "Ref": "SpaceUserPoolSpaceUserPoolclient4839E5E8"
+   }
+  },
+  "IdentityPoolId": {
+   "Value": {
+    "Ref": "SpaceFinderIdentityPool"
    }
   }
  },
